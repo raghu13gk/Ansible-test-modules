@@ -4,22 +4,35 @@
   gather_facts: yes
   become: yes
   become_user: root
-  #serial: 1
   vars:
     AWS_ACCOUNT: "897729105738"
   tasks:
     - name: Print Variable
       debug:
-        msg: System {{ inventory_hostname }} has variable {{ AWS_ACCOUNT }}
+        msg: "System {{ inventory_hostname }} has variable {{ AWS_ACCOUNT }}"
 
-    - name: Print Variable Sesitive
+    - name: Print Variable Sensitive
       debug:
-        msg: System {{ inventory_hostname }} has variable {{ AWS_ACCOUNT }}
+        msg: "System {{ inventory_hostname }} has variable {{ AWS_ACCOUNT }}"
       no_log: True
 
-    - name: Perform apt update & Install basic packages
-      shell: apt update && apt install -y unzip jq net-tools stress
-      when: (ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04")
+    - name: Perform apt update
+      apt:
+        update_cache: yes
+      when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
+      timeout: 30
+      tags:
+        - tools
+
+    - name: Install basic packages
+      apt:
+        name: 
+          - unzip
+          - jq
+          - net-tools
+          - stress
+        state: present
+      when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
       timeout: 30
       tags:
         - tools
@@ -29,18 +42,20 @@
         name: nginx
         state: latest
         update_cache: yes
-      when: (ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04")
+      when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
       timeout: 30
+      tags:
+        - nginx
 
     - name: Start Nginx Service
       service:
         name: nginx
         state: started
-      when: (ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04")
-  tags:
-    - nginx
+      when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
+      tags:
+        - nginx
 
-- name: Play For Copying File
+- name: Play For Copying Files
   hosts: testserver01:testserver02:testserver03
   become: yes
   become_user: root
@@ -52,7 +67,9 @@
         owner: root
         group: root
         mode: "0644"
-      when: (ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04")
+      when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
+      tags:
+        - files
 
     - name: Copy scorekeeper.js file
       copy:
@@ -61,7 +78,9 @@
         owner: root
         group: root
         mode: "0644"
-      when: (ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04")
+      when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
+      tags:
+        - files
 
     - name: Copy style.css file
       copy:
@@ -70,6 +89,6 @@
         owner: root
         group: root
         mode: "0644"
-      when: (ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04")
-  tags:
-    - files
+      when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
+      tags:
+        - files
