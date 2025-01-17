@@ -3,13 +3,26 @@
   hosts: pvt
   gather_facts: yes
   become: yes
-  become_user: root
   vars:
     TFROM: 1.8.5
   tasks:
-    - name: check the hostnames
-      shell: cat /etc/lsb-release
-    - name: perform apt update
-      shell: apt-get update
-    - name: install tools
-      shell: apt-get install -y unzip jq stress net-tools
+    - name: Check the hostnames
+      command: cat /etc/lsb-release
+      register: hostname_output
+    - name: Display hostname information
+      debug:
+        var: hostname_output.stdout
+
+    - name: Perform apt update
+      apt:
+        update_cache: yes
+
+    - name: Install tools
+      apt:
+        name:
+          - unzip
+          - jq
+          - stress
+          - net-tools
+        state: present
+        upgrade: yes
