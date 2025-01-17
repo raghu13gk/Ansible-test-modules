@@ -20,20 +20,18 @@
       apt:
         update_cache: yes
       when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
-      timeout: 30
       tags:
         - tools
 
     - name: Install basic packages
       apt:
-        name: 
+        name:
           - unzip
           - jq
           - net-tools
           - stress
         state: present
       when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
-      timeout: 30
       tags:
         - tools
 
@@ -41,9 +39,7 @@
       apt:
         name: nginx
         state: latest
-        update_cache: yes
       when: ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_version'] == "24.04"
-      timeout: 30
       tags:
         - nginx
 
